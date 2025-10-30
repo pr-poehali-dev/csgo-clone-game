@@ -1,8 +1,10 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Player, generateRandomDamage } from '@/lib/gameLogic';
 import { GameHUD } from './GameHUD';
+import { Game3DScene } from './Game3DScene';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { audioManager } from '@/lib/soundEffects';
 import Icon from '@/components/ui/icon';
 
 interface GameArenaProps {
@@ -14,6 +16,7 @@ export const GameArena = ({ onBackToMenu }: GameArenaProps) => {
   const [kills, setKills] = useState(0);
   const [deaths, setDeaths] = useState(0);
   const [enemies, setEnemies] = useState(3);
+  const [recoil, setRecoil] = useState(false);
   const { toast } = useToast();
 
   const handleShoot = useCallback(() => {
@@ -22,8 +25,13 @@ export const GameArena = ({ onBackToMenu }: GameArenaProps) => {
       const canShoot = newPlayer.shoot();
       
       if (canShoot) {
+        audioManager.playShootSound();
+        setRecoil(true);
+        setTimeout(() => setRecoil(false), 100);
+        
         const hit = Math.random() > 0.5;
         if (hit) {
+          audioManager.playHitSound();
           setKills(k => k + 1);
           setEnemies(e => Math.max(0, e - 1));
           toast({
@@ -49,6 +57,7 @@ export const GameArena = ({ onBackToMenu }: GameArenaProps) => {
     setPlayer(prev => {
       const newPlayer = Object.assign(Object.create(Object.getPrototypeOf(prev)), prev);
       newPlayer.reload();
+      audioManager.playReloadSound();
       toast({
         title: "Reloading...",
         description: "Ammo refilled",
@@ -104,6 +113,7 @@ export const GameArena = ({ onBackToMenu }: GameArenaProps) => {
           const newPlayer = Object.assign(Object.create(Object.getPrototypeOf(prev)), prev);
           const damage = generateRandomDamage();
           newPlayer.takeDamage(damage);
+          audioManager.playDamageSound();
           
           if (!newPlayer.isAlive()) {
             setDeaths(d => d + 1);
@@ -126,9 +136,15 @@ export const GameArena = ({ onBackToMenu }: GameArenaProps) => {
     return () => clearInterval(enemyInterval);
   }, [toast]);
 
+  useEffect(() => {
+    if (enemies === 0) {
+      audioManager.playVictorySound();
+    }
+  }, [enemies]);
+
   return (
-    <div className="min-h-screen w-full bg-background tactical-grid relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-black/50 to-transparent pointer-events-none"></div>
+    <div className="min-h-screen w-full bg-background relative overflow-hidden">
+      <Game3DScene playerPosition={player.position} recoil={recoil} />
       
       <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-50">
         <Button 
@@ -142,35 +158,18 @@ export const GameArena = ({ onBackToMenu }: GameArenaProps) => {
         </Button>
       </div>
 
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="text-center space-y-8">
-          <div className="bg-black/60 backdrop-blur-sm border border-primary/30 rounded-lg p-12 max-w-2xl">
-            <Icon name="Crosshair" size={80} className="text-primary mx-auto mb-6" />
-            <h2 className="text-4xl font-bold mb-4">DEATHMATCH ACTIVE</h2>
-            <p className="text-muted-foreground mb-8">
-              Используйте WASD для перемещения и SPACE для стрельбы
-            </p>
-            
-            <div className="flex justify-center gap-8 text-2xl font-bold">
-              <div>
-                <div className="text-muted-foreground text-sm mb-2">ENEMIES LEFT</div>
-                <div className="text-destructive text-4xl">{enemies}</div>
-              </div>
+      {enemies === 0 && (
+        <div className="absolute inset-0 flex items-center justify-center z-50 pointer-events-none">
+          <div className="bg-black/80 backdrop-blur-sm border border-primary rounded-lg p-12 pointer-events-auto">
+            <div className="text-5xl font-bold text-primary text-shadow-glow mb-4">
+              VICTORY!
             </div>
-
-            {enemies === 0 && (
-              <div className="mt-8 space-y-4">
-                <div className="text-3xl font-bold text-primary text-shadow-glow">
-                  VICTORY!
-                </div>
-                <Button onClick={onBackToMenu} size="lg">
-                  Back to Menu
-                </Button>
-              </div>
-            )}
+            <Button onClick={onBackToMenu} size="lg" className="w-full">
+              Back to Menu
+            </Button>
           </div>
         </div>
-      </div>
+      )}
 
       <GameHUD player={player} kills={kills} deaths={deaths} />
     </div>
