@@ -1,22 +1,26 @@
 import { Canvas } from '@react-three/fiber';
 import { Sky, Environment } from '@react-three/drei';
 import { WeaponModel } from './WeaponModel';
-import { EnemyBot } from './EnemyBot';
+import { TerroristModel } from './TerroristModel';
+import { FirstPersonControls } from './FirstPersonControls';
 import { Suspense, useState, useEffect } from 'react';
 import * as THREE from 'three';
+import { BotState } from '@/lib/botAI';
 
 interface Game3DSceneProps {
   playerPosition: { x: number; y: number };
   recoil: boolean;
-  enemies: Array<{ id: number; position: [number, number, number]; alive: boolean }>;
+  enemies: BotState[];
   onEnemyHit: (id: number) => void;
+  onMove: (direction: 'forward' | 'backward' | 'left' | 'right') => void;
+  espEnabled?: boolean;
 }
 
 const MapGeometry = () => {
   return (
     <group>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
-        <planeGeometry args={[50, 50]} />
+        <planeGeometry args={[100, 100]} />
         <meshStandardMaterial 
           color="#2d3748" 
           metalness={0.1} 
@@ -24,52 +28,75 @@ const MapGeometry = () => {
         />
       </mesh>
 
-      <mesh position={[-10, 2, 0]} castShadow>
-        <boxGeometry args={[2, 4, 10]} />
-        <meshStandardMaterial color="#1a1f2c" metalness={0.3} roughness={0.7} />
+      <mesh position={[-15, 3, 0]} castShadow>
+        <boxGeometry args={[3, 6, 15]} />
+        <meshStandardMaterial color="#8b4513" metalness={0.1} roughness={0.9} />
       </mesh>
 
-      <mesh position={[10, 2, 0]} castShadow>
-        <boxGeometry args={[2, 4, 10]} />
-        <meshStandardMaterial color="#1a1f2c" metalness={0.3} roughness={0.7} />
+      <mesh position={[15, 3, 0]} castShadow>
+        <boxGeometry args={[3, 6, 15]} />
+        <meshStandardMaterial color="#8b4513" metalness={0.1} roughness={0.9} />
       </mesh>
 
-      <mesh position={[0, 2, -10]} castShadow>
-        <boxGeometry args={[20, 4, 2]} />
-        <meshStandardMaterial color="#1a1f2c" metalness={0.3} roughness={0.7} />
+      <mesh position={[0, 3, -20]} castShadow>
+        <boxGeometry args={[30, 6, 3]} />
+        <meshStandardMaterial color="#8b4513" metalness={0.1} roughness={0.9} />
       </mesh>
 
-      <mesh position={[-5, 1.5, 5]} castShadow>
-        <boxGeometry args={[3, 3, 3]} />
-        <meshStandardMaterial color="#374151" metalness={0.2} roughness={0.8} />
+      <mesh position={[0, 3, 20]} castShadow>
+        <boxGeometry args={[30, 6, 3]} />
+        <meshStandardMaterial color="#8b4513" metalness={0.1} roughness={0.9} />
       </mesh>
 
-      <mesh position={[5, 1.5, 5]} castShadow>
-        <boxGeometry args={[3, 3, 3]} />
-        <meshStandardMaterial color="#374151" metalness={0.2} roughness={0.8} />
+      <mesh position={[-7, 2, -5]} castShadow>
+        <boxGeometry args={[4, 4, 4]} />
+        <meshStandardMaterial color="#654321" metalness={0.2} roughness={0.8} />
       </mesh>
 
-      <mesh position={[0, 1, -5]} castShadow>
-        <cylinderGeometry args={[1.5, 1.5, 2, 8]} />
-        <meshStandardMaterial color="#4b5563" metalness={0.4} roughness={0.6} />
+      <mesh position={[7, 2, -5]} castShadow>
+        <boxGeometry args={[4, 4, 4]} />
+        <meshStandardMaterial color="#654321" metalness={0.2} roughness={0.8} />
       </mesh>
 
-      <mesh position={[-8, 0.5, 8]} castShadow>
-        <boxGeometry args={[1, 1, 1]} />
-        <meshStandardMaterial color="#6b7280" metalness={0.3} roughness={0.7} />
+      <mesh position={[-7, 2, 8]} castShadow>
+        <boxGeometry args={[4, 4, 4]} />
+        <meshStandardMaterial color="#654321" metalness={0.2} roughness={0.8} />
       </mesh>
 
-      <mesh position={[8, 0.5, 8]} castShadow>
-        <boxGeometry args={[1, 1, 1]} />
-        <meshStandardMaterial color="#6b7280" metalness={0.3} roughness={0.7} />
+      <mesh position={[7, 2, 8]} castShadow>
+        <boxGeometry args={[4, 4, 4]} />
+        <meshStandardMaterial color="#654321" metalness={0.2} roughness={0.8} />
       </mesh>
 
-      {[...Array(5)].map((_, i) => (
-        <mesh key={i} position={[-15 + i * 7, 0.2, 12]} castShadow>
-          <cylinderGeometry args={[0.3, 0.3, 0.4, 6]} />
-          <meshStandardMaterial color="#9ca3af" metalness={0.5} roughness={0.5} />
-        </mesh>
-      ))}
+      <mesh position={[0, 1.5, 0]} castShadow>
+        <cylinderGeometry args={[2, 2, 3, 12]} />
+        <meshStandardMaterial color="#696969" metalness={0.4} roughness={0.6} />
+      </mesh>
+
+      {[...Array(8)].map((_, i) => {
+        const angle = (i / 8) * Math.PI * 2;
+        const radius = 25;
+        return (
+          <mesh 
+            key={i} 
+            position={[Math.cos(angle) * radius, 0.5, Math.sin(angle) * radius]} 
+            castShadow
+          >
+            <cylinderGeometry args={[0.5, 0.5, 1, 8]} />
+            <meshStandardMaterial color="#556b2f" metalness={0.3} roughness={0.7} />
+          </mesh>
+        );
+      })}
+
+      <mesh position={[-10, 1, 10]} castShadow>
+        <boxGeometry args={[2, 2, 6]} />
+        <meshStandardMaterial color="#8b7355" metalness={0.2} roughness={0.8} />
+      </mesh>
+
+      <mesh position={[10, 1, 10]} castShadow>
+        <boxGeometry args={[2, 2, 6]} />
+        <meshStandardMaterial color="#8b7355" metalness={0.2} roughness={0.8} />
+      </mesh>
     </group>
   );
 };
@@ -88,7 +115,7 @@ const MuzzleFlash = ({ show }: { show: boolean }) => {
   );
 };
 
-export const Game3DScene = ({ playerPosition, recoil, enemies, onEnemyHit }: Game3DSceneProps) => {
+export const Game3DScene = ({ playerPosition, recoil, enemies, onEnemyHit, onMove, espEnabled = false }: Game3DSceneProps) => {
   const [showMuzzleFlash, setShowMuzzleFlash] = useState(false);
 
   useEffect(() => {
@@ -153,13 +180,24 @@ export const Game3DScene = ({ playerPosition, recoil, enemies, onEnemyHit }: Gam
 
           <MapGeometry />
           
+          <FirstPersonControls onMove={onMove} />
+          
           {enemies.map(enemy => (
-            <EnemyBot
-              key={enemy.id}
-              position={enemy.position}
-              isAlive={enemy.alive}
-              onHit={() => onEnemyHit(enemy.id)}
-            />
+            <group key={enemy.id}>
+              <TerroristModel
+                position={enemy.position}
+                isAlive={enemy.isAlive}
+                isMoving={enemy.isMoving}
+                isShooting={enemy.isShooting}
+                rotation={enemy.rotation}
+              />
+              {espEnabled && enemy.isAlive && (
+                <mesh position={[enemy.position[0], enemy.position[1] + 2, enemy.position[2]]}>
+                  <sphereGeometry args={[0.2]} />
+                  <meshBasicMaterial color="#ff0000" transparent opacity={0.8} />
+                </mesh>
+              )}
+            </group>
           ))}
           
           <WeaponModel recoil={recoil} />
@@ -168,7 +206,7 @@ export const Game3DScene = ({ playerPosition, recoil, enemies, onEnemyHit }: Gam
 
           <Environment preset="sunset" />
 
-          <fog attach="fog" args={['#1a1f2c', 10, 50]} />
+          <fog attach="fog" args={['#1a1f2c', 20, 100]} />
         </Suspense>
       </Canvas>
     </div>

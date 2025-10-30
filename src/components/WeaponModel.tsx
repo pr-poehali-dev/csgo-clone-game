@@ -26,43 +26,58 @@ export const WeaponModel = ({ recoil }: WeaponModelProps) => {
   });
 
   return (
-    <group ref={groupRef} position={[0.3, -0.3, -0.5]} rotation={[0, Math.PI, 0]}>
+    <group ref={groupRef} position={[0.4, -0.4, -0.8]} rotation={[0, Math.PI, 0]}>
       <mesh position={[0, 0, 0]}>
-        <boxGeometry args={[0.05, 0.05, 0.4]} />
-        <meshStandardMaterial color="#1a1a1a" metalness={0.8} roughness={0.2} />
-      </mesh>
-
-      <mesh position={[0, 0, 0.25]}>
-        <boxGeometry args={[0.08, 0.08, 0.1]} />
-        <meshStandardMaterial color="#2d2d2d" metalness={0.6} roughness={0.3} />
-      </mesh>
-
-      <mesh position={[0, -0.05, 0.1]}>
-        <boxGeometry args={[0.06, 0.1, 0.2]} />
-        <meshStandardMaterial color="#1a1a1a" metalness={0.7} roughness={0.2} />
-      </mesh>
-
-      <mesh position={[0, -0.08, -0.05]}>
-        <boxGeometry args={[0.04, 0.03, 0.1]} />
-        <meshStandardMaterial color="#f59e0b" metalness={0.9} roughness={0.1} />
-      </mesh>
-
-      <mesh position={[0, 0, -0.15]}>
-        <cylinderGeometry args={[0.015, 0.015, 0.1, 8]} />
+        <boxGeometry args={[0.08, 0.08, 0.6]} />
         <meshStandardMaterial color="#1a1a1a" metalness={0.9} roughness={0.1} />
       </mesh>
 
-      <mesh position={[0.03, 0, 0]}>
-        <boxGeometry args={[0.02, 0.02, 0.15]} />
-        <meshStandardMaterial color="#4a4a4a" metalness={0.5} roughness={0.4} />
+      <mesh position={[0, 0, 0.35]}>
+        <boxGeometry args={[0.1, 0.1, 0.15]} />
+        <meshStandardMaterial color="#2d2d2d" metalness={0.7} roughness={0.2} />
       </mesh>
 
-      <mesh position={[-0.03, 0, 0]}>
-        <boxGeometry args={[0.02, 0.02, 0.15]} />
-        <meshStandardMaterial color="#4a4a4a" metalness={0.5} roughness={0.4} />
+      <mesh position={[0, -0.06, 0.15]}>
+        <boxGeometry args={[0.08, 0.12, 0.25]} />
+        <meshStandardMaterial color="#1a1a1a" metalness={0.8} roughness={0.15} />
       </mesh>
 
-      <pointLight position={[0, 0, 0.3]} intensity={0.5} distance={2} color="#f59e0b" />
+      <mesh position={[0, -0.1, -0.08]}>
+        <boxGeometry args={[0.05, 0.04, 0.15]} />
+        <meshStandardMaterial color="#8b4513" metalness={0.2} roughness={0.7} />
+      </mesh>
+
+      <mesh position={[0, -0.12, -0.2]}>
+        <boxGeometry args={[0.06, 0.03, 0.2]} />
+        <meshStandardMaterial color="#654321" metalness={0.1} roughness={0.8} />
+      </mesh>
+
+      <mesh position={[0, 0, -0.25]}>
+        <cylinderGeometry args={[0.02, 0.02, 0.15, 12]} />
+        <meshStandardMaterial color="#1a1a1a" metalness={0.95} roughness={0.05} />
+      </mesh>
+
+      <mesh position={[0.04, 0.02, 0.1]}>
+        <boxGeometry args={[0.03, 0.03, 0.2]} />
+        <meshStandardMaterial color="#4a4a4a" metalness={0.6} roughness={0.3} />
+      </mesh>
+
+      <mesh position={[-0.04, 0.02, 0.1]}>
+        <boxGeometry args={[0.03, 0.03, 0.2]} />
+        <meshStandardMaterial color="#4a4a4a" metalness={0.6} roughness={0.3} />
+      </mesh>
+
+      <mesh position={[0, 0.05, 0.2]}>
+        <boxGeometry args={[0.06, 0.02, 0.1]} />
+        <meshStandardMaterial color="#2d2d2d" metalness={0.7} roughness={0.2} />
+      </mesh>
+
+      <mesh position={[0, 0, 0.42]}>
+        <cylinderGeometry args={[0.015, 0.015, 0.05, 8]} />
+        <meshStandardMaterial color="#ff4444" emissive="#ff0000" emissiveIntensity={0.5} />
+      </mesh>
+
+      <pointLight position={[0, 0, 0.4]} intensity={0.3} distance={2} color="#f59e0b" />
     </group>
   );
 };
