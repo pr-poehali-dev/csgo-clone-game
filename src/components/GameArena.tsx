@@ -11,13 +11,38 @@ interface GameArenaProps {
   onBackToMenu: () => void;
 }
 
+interface Enemy {
+  id: number;
+  position: [number, number, number];
+  alive: boolean;
+}
+
 export const GameArena = ({ onBackToMenu }: GameArenaProps) => {
   const [player, setPlayer] = useState<Player>(new Player('Player1'));
   const [kills, setKills] = useState(0);
   const [deaths, setDeaths] = useState(0);
-  const [enemies, setEnemies] = useState(3);
   const [recoil, setRecoil] = useState(false);
+  const [enemyBots, setEnemyBots] = useState<Enemy[]>([
+    { id: 1, position: [-8, 1, -5], alive: true },
+    { id: 2, position: [8, 1, -5], alive: true },
+    { id: 3, position: [0, 1, -10], alive: true },
+  ]);
   const { toast } = useToast();
+
+  const handleEnemyHit = useCallback((enemyId: number) => {
+    setEnemyBots(prev => 
+      prev.map(enemy => 
+        enemy.id === enemyId ? { ...enemy, alive: false } : enemy
+      )
+    );
+    audioManager.playHitSound();
+    setKills(k => k + 1);
+    toast({
+      title: "KILL!",
+      description: "Enemy eliminated",
+      duration: 1000,
+    });
+  }, [toast]);
 
   const handleShoot = useCallback(() => {
     setPlayer(prev => {
@@ -29,16 +54,13 @@ export const GameArena = ({ onBackToMenu }: GameArenaProps) => {
         setRecoil(true);
         setTimeout(() => setRecoil(false), 100);
         
-        const hit = Math.random() > 0.5;
+        const hit = Math.random() > 0.4;
         if (hit) {
-          audioManager.playHitSound();
-          setKills(k => k + 1);
-          setEnemies(e => Math.max(0, e - 1));
-          toast({
-            title: "KILL!",
-            description: "Enemy eliminated",
-            duration: 1000,
-          });
+          const aliveEnemies = enemyBots.filter(e => e.alive);
+          if (aliveEnemies.length > 0) {
+            const randomEnemy = aliveEnemies[Math.floor(Math.random() * aliveEnemies.length)];
+            handleEnemyHit(randomEnemy.id);
+          }
         }
       } else {
         toast({
@@ -51,7 +73,7 @@ export const GameArena = ({ onBackToMenu }: GameArenaProps) => {
       
       return newPlayer;
     });
-  }, [toast]);
+  }, [toast, enemyBots, handleEnemyHit]);
 
   const handleReload = useCallback(() => {
     setPlayer(prev => {
@@ -136,15 +158,22 @@ export const GameArena = ({ onBackToMenu }: GameArenaProps) => {
     return () => clearInterval(enemyInterval);
   }, [toast]);
 
+  const aliveEnemiesCount = enemyBots.filter(e => e.alive).length;
+
   useEffect(() => {
-    if (enemies === 0) {
+    if (aliveEnemiesCount === 0 && enemyBots.length > 0) {
       audioManager.playVictorySound();
     }
-  }, [enemies]);
+  }, [aliveEnemiesCount, enemyBots.length]);
 
   return (
     <div className="min-h-screen w-full bg-background relative overflow-hidden">
-      <Game3DScene playerPosition={player.position} recoil={recoil} />
+      <Game3DScene 
+        playerPosition={player.position} 
+        recoil={recoil}
+        enemies={enemyBots}
+        onEnemyHit={handleEnemyHit}
+      />
       
       <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-50">
         <Button 
@@ -158,7 +187,7 @@ export const GameArena = ({ onBackToMenu }: GameArenaProps) => {
         </Button>
       </div>
 
-      {enemies === 0 && (
+      {aliveEnemiesCount === 0 && enemyBots.length > 0 && (
         <div className="absolute inset-0 flex items-center justify-center z-50 pointer-events-none">
           <div className="bg-black/80 backdrop-blur-sm border border-primary rounded-lg p-12 pointer-events-auto">
             <div className="text-5xl font-bold text-primary text-shadow-glow mb-4">

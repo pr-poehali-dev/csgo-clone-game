@@ -49,9 +49,12 @@ export const GameMenu = ({ onStartGame }: GameMenuProps) => {
     <div className="min-h-screen w-full bg-background tactical-grid flex items-center justify-center p-8">
       <div className="max-w-6xl w-full">
         <div className="text-center mb-12">
-          <h1 className="text-6xl font-bold mb-4 text-primary text-shadow-glow">
-            TACTICAL OPS
+          <h1 className="text-7xl font-bold mb-2 text-primary text-shadow-glow tracking-wider">
+            CS GO 2
           </h1>
+          <p className="text-primary/60 text-sm font-semibold tracking-widest mb-4">
+            COUNTER-STRIKE: GLOBAL OFFENSIVE 2
+          </p>
           <p className="text-muted-foreground text-lg">
             Выберите режим игры
           </p>

@@ -1,12 +1,15 @@
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Sky, Environment } from '@react-three/drei';
 import { WeaponModel } from './WeaponModel';
+import { EnemyBot } from './EnemyBot';
 import { Suspense, useState, useEffect } from 'react';
 import * as THREE from 'three';
 
 interface Game3DSceneProps {
   playerPosition: { x: number; y: number };
   recoil: boolean;
+  enemies: Array<{ id: number; position: [number, number, number]; alive: boolean }>;
+  onEnemyHit: (id: number) => void;
 }
 
 const MapGeometry = () => {
@@ -85,7 +88,7 @@ const MuzzleFlash = ({ show }: { show: boolean }) => {
   );
 };
 
-export const Game3DScene = ({ playerPosition, recoil }: Game3DSceneProps) => {
+export const Game3DScene = ({ playerPosition, recoil, enemies, onEnemyHit }: Game3DSceneProps) => {
   const [showMuzzleFlash, setShowMuzzleFlash] = useState(false);
 
   useEffect(() => {
@@ -141,6 +144,15 @@ export const Game3DScene = ({ playerPosition, recoil }: Game3DSceneProps) => {
           />
 
           <MapGeometry />
+          
+          {enemies.map(enemy => (
+            <EnemyBot
+              key={enemy.id}
+              position={enemy.position}
+              isAlive={enemy.alive}
+              onHit={() => onEnemyHit(enemy.id)}
+            />
+          ))}
           
           <WeaponModel recoil={recoil} />
           
