@@ -1,5 +1,5 @@
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Sky, Environment } from '@react-three/drei';
+import { Sky, Environment } from '@react-three/drei';
 import { WeaponModel } from './WeaponModel';
 import { EnemyBot } from './EnemyBot';
 import { Suspense, useState, useEffect } from 'react';
@@ -114,8 +114,16 @@ export const Game3DScene = ({ playerPosition, recoil, enemies, onEnemyHit }: Gam
           toneMapping: THREE.ACESFilmicToneMapping,
           toneMappingExposure: 1.2
         }}
+        onCreated={(state) => {
+          state.gl.setClearColor('#1a1f2c');
+        }}
       >
-        <Suspense fallback={null}>
+        <Suspense fallback={
+          <mesh>
+            <boxGeometry args={[1, 1, 1]} />
+            <meshBasicMaterial color="#f59e0b" />
+          </mesh>
+        }>
           <Sky
             distance={450000}
             sunPosition={[100, 20, 100]}
