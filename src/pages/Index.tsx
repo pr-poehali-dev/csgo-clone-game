@@ -1,12 +1,27 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from 'react';
+import { GameMenu } from '@/components/GameMenu';
+import { GameArena } from '@/components/GameArena';
 
 const Index = () => {
+  const [gameMode, setGameMode] = useState<string | null>(null);
+
+  const handleStartGame = (mode: string) => {
+    if (mode === 'deathmatch') {
+      setGameMode(mode);
+    }
+  };
+
+  const handleBackToMenu = () => {
+    setGameMode(null);
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4 color-black text-black">Добро пожаловать!</h1>
-        <p className="text-xl text-gray-600">тут будет отображаться ваш проект</p>
-      </div>
+    <div className="min-h-screen">
+      {!gameMode ? (
+        <GameMenu onStartGame={handleStartGame} />
+      ) : (
+        <GameArena onBackToMenu={handleBackToMenu} />
+      )}
     </div>
   );
 };
