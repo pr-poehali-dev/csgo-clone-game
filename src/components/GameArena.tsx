@@ -1,7 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Player, generateRandomDamage } from '@/lib/gameLogic';
 import { GameHUD } from './GameHUD';
-import { Game3DScene } from './Game3DScene';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { audioManager } from '@/lib/soundEffects';
@@ -167,14 +166,41 @@ export const GameArena = ({ onBackToMenu }: GameArenaProps) => {
   }, [aliveEnemiesCount, enemyBots.length]);
 
   return (
-    <div className="min-h-screen w-full bg-background relative overflow-hidden">
-      <Game3DScene 
-        playerPosition={player.position} 
-        recoil={recoil}
-        enemies={enemyBots}
-        onEnemyHit={handleEnemyHit}
-      />
-      
+    <div className="min-h-screen w-full bg-background relative overflow-hidden tactical-grid">
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="relative w-full max-w-4xl aspect-video">
+          <div 
+            className="absolute w-12 h-12 bg-primary rounded transition-all duration-200"
+            style={{
+              left: `${(player.position.x + 10) * 2}%`,
+              top: `${(player.position.y + 10) * 2}%`,
+              transform: recoil ? 'scale(1.2)' : 'scale(1)',
+              boxShadow: recoil ? '0 0 20px rgba(234, 179, 8, 0.8)' : 'none'
+            }}
+          >
+            <div className="absolute inset-0 flex items-center justify-center text-2xl">
+              🎯
+            </div>
+          </div>
+
+          {enemyBots.map(enemy => enemy.alive && (
+            <div
+              key={enemy.id}
+              className="absolute w-12 h-12 bg-destructive rounded animate-pulse cursor-crosshair"
+              style={{
+                left: `${(enemy.position[0] + 10) * 2}%`,
+                top: `${(enemy.position[2] + 10) * 2}%`,
+              }}
+              onClick={() => handleEnemyHit(enemy.id)}
+            >
+              <div className="absolute inset-0 flex items-center justify-center text-2xl">
+                👾
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-50">
         <Button 
           variant="outline" 
@@ -183,7 +209,7 @@ export const GameArena = ({ onBackToMenu }: GameArenaProps) => {
           className="bg-black/80 backdrop-blur-sm border-primary/30"
         >
           <Icon name="ArrowLeft" size={16} className="mr-2" />
-          Back to Menu
+          Назад в меню
         </Button>
       </div>
 
@@ -191,10 +217,10 @@ export const GameArena = ({ onBackToMenu }: GameArenaProps) => {
         <div className="absolute inset-0 flex items-center justify-center z-50 pointer-events-none">
           <div className="bg-black/80 backdrop-blur-sm border border-primary rounded-lg p-12 pointer-events-auto">
             <div className="text-5xl font-bold text-primary text-shadow-glow mb-4">
-              VICTORY!
+              ПОБЕДА!
             </div>
             <Button onClick={onBackToMenu} size="lg" className="w-full">
-              Back to Menu
+              Назад в меню
             </Button>
           </div>
         </div>
